@@ -1,0 +1,59 @@
+
+services:
+  postgres-test:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    ports:
+      - "5433:5432"  # Different port to avoid conflict
+
+  airflow-webserver:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    command: bash -c "airflow db init && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com && airflow webserver"
+    ports:
+      - "8081:8080"  # Different port to avoid conflict
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./models:/opt/airflow/models
+      - ./data:/opt/airflow/data
+      - ./src:/opt/airflow/src
+      - ./config:/opt/airflow/config
+      - ./ntc-scv:/opt/airflow/ntc-scv
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres-test:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+      - DATA_SOURCE_DIR=/opt/airflow/ntc-scv/data_train/train
+      - DATA_DEST_DIR=/opt/airflow/data/raw/train
+      - CONFIG_DIR=/opt/airflow/config
+    depends_on:
+      - postgres-test
+
+  airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    command: scheduler
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./models:/opt/airflow/models
+      - ./data:/opt/airflow/data
+      - ./src:/opt/airflow/src
+      - ./config:/opt/airflow/config
+      - ./ntc-scv:/opt/airflow/ntc-scv
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres-test:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+      - DATA_SOURCE_DIR=/opt/airflow/ntc-scv/data_train/train
+      - DATA_DEST_DIR=/opt/airflow/data/raw/train
+      - CONFIG_DIR=/opt/airflow/config
+    depends_on:
+      - postgres-test
+      - airflow-webserver

@@ -1,0 +1,40 @@
+dataconfig:
+  data_test_path: /opt/airflow/data/raw/test
+  data_train_path: /opt/airflow/data/raw/train
+  data_val_path: /opt/airflow/data/raw/val
+  
+modelconfig:
+  modelname: textcnn
+  vocab_size: 5000
+  embed_size: 200
+  num_filters: 100
+  num_classes: 2
+  kernel_sizes: [2,3,4]
+
+trainconfig:
+  run_name: textcnn
+  vocab_size: 5000
+  seed: 42
+  epochs: 1
+  batch_size: 32
+  optimizer: adam
+  learning_rate: 0.001
+  min_freq: 5
+  max_tokens: 5000
+  best_model_metric: val_loss
+  best_deploy_metric: val_loss
+  device: cpu
+  build_vocab: true
+  register_model: true
+  vocab_path: /opt/airflow/models/vocab/vocab_textCNN.pth
+
+mlflowconfig:
+  tracking_uri: http://mlflow:5000
+  experiment_name: textcnn_experiment
+  registered_model_name: textcnn_model
+  model_alias: textcnn_model_v1
+
+
+
+
+

@@ -1,0 +1,12 @@
+mlflow==2.6.0
+pyvi==0.1.1
+emoji==2.8.0
+numpy<2.0.0
+pandas==1.5.3
+scikit-learn==1.2.2
+psycopg2-binary==2.9.6
+apache-airflow-providers-postgres
+langid==1.1.6
+pyyaml==6.0.1
+ipdb==0.13.13
+pydantic<2.0.0

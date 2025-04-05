@@ -1,0 +1,100 @@
+# Virtual Environments - strongly exclude all of these
+venv/
+env/
+myenv/
+**/myenv/
+backend/myenv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+**/Lib/
+**/lib/
+**/Scripts/
+**/Include/
+**/bin/
+**/include/
+**/venv/**
+**/env/**
+**/.venv/**
+
+# PyTorch specific large files
+**/torch/lib/
+**/torch/lib/torch_cpu.dll
+**/torch/lib/dnnl.lib
+**/torch_cpu.dll
+**/dnnl.lib
+**/site-packages/torch/lib/**
+**/site-packages/**/*.dll
+**/site-packages/**/*.lib
+*.dll
+*.lib
+*.pyd
+
+# Python bytecode
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# MLflow
+mlruns/
+
+# Docker
+.dockerignore
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Data and model files (if large)
+*.h5
+*.pt
+*.pth
+*.bin
+*.model
+*.hdf5
+*.pkl
+*.pickle
+*.csv
+*.json
+*.sqlite
+*.db
+!/data/example_small.csv
+# Allow small example files but exclude large datasets
+
+# Logs
+logs/
+*.log
+
+# Local environment
+.env
+.env.local

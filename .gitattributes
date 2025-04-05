@@ -1,0 +1,25 @@
+# Declare files that will always have CRLF line endings on checkout
+*.bat text eol=crlf
+
+# Exclude large binaries
+*.dll binary -diff -merge -text
+*.lib binary -diff -merge -text
+*.pyd binary -diff -merge -text
+*.so binary -diff -merge -text
+
+# GitHub LFS (Large File Storage) section
+# Uncomment these lines only if you have Git LFS installed and set up
+# *.dll filter=lfs diff=lfs merge=lfs -text
+# *.lib filter=lfs diff=lfs merge=lfs -text
+# *.pyd filter=lfs diff=lfs merge=lfs -text
+# *.so filter=lfs diff=lfs merge=lfs -text
+# *.pt filter=lfs diff=lfs merge=lfs -text
+# *.pth filter=lfs diff=lfs merge=lfs -text
+
+# Virtual environment
+myenv/ -text
+backend/myenv/ -text
+**/myenv/ -text
+
+# Exclude PyTorch libraries
+**/torch/lib/* -text

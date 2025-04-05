@@ -1,0 +1,150 @@
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    networks:
+      - sentiment_network
+
+  mlflow:
+    build:
+      context: ./mlflow_
+      dockerfile: Dockerfile
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - BACKEND_STORE_URI=/mlflow/mlruns
+      - DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlflow_/artifacts:/mlflow/artifacts
+      - ./mlflow_/mlruns:/mlflow/mlruns
+      - ./data:/mlflow_/data
+    depends_on:
+      - postgres
+    networks:
+      - sentiment_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./ntc-scv:/app/ntc-scv
+      - ./src:/app/src
+      - ./data:/app/data
+    environment:
+      - PYTHONPATH=/app
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - mlflow
+    networks:
+      - sentiment_network
+  airflow-init:
+    image: apache/airflow:2.7.1
+    depends_on:
+      - postgres
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    command: db init
+    networks:
+      - sentiment_network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./frontend/app:/app/app
+    environment:
+      - BACKEND_API=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - sentiment_network
+
+  airflow-webserver:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    command: webserver
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./models:/opt/airflow/models
+      - ./data:/opt/airflow/data
+      - ./src:/opt/airflow/src
+      - ./airflow/dags/config:/opt/airflow/config
+      - ./ntc-scv:/opt/airflow/ntc-scv
+      - ./mlflow_/artifacts:/opt/airflow/mlflow_/artifacts
+      - ./mlflow_:/opt/airflow/mlflow_
+      - ./mlflow_/data:/opt/airflow/mlflow_/data
+      - ./mlflow_/mlruns:/opt/airflow/mlflow_/mlruns
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - DATA_SOURCE_DIR=/opt/airflow/ntc-scv/data_train/train
+      - DATA_DEST_DIR=/opt/airflow/data/raw/train
+      - CONFIG_DIR=/opt/airflow/config
+    depends_on:
+      - postgres
+      - airflow-init
+      - mlflow
+    networks:
+      - sentiment_network
+
+  airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    command: scheduler
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/dags/config:/opt/airflow/config
+      - ./models:/opt/airflow/models
+      - ./data:/opt/airflow/data
+      - ./src:/opt/airflow/src
+      - ./mlflow_/artifacts:/opt/airflow/mlflow_/artifacts
+      - ./mlflow_:/opt/airflow/mlflow_
+      - ./mlflow_/data:/opt/airflow/mlflow_/data
+      - ./mlflow_/mlruns:/opt/airflow/mlflow_/mlruns
+      - ./ntc-scv:/opt/airflow/ntc-scv
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - DATA_SOURCE_DIR=/opt/airflow/ntc-scv/data_train/train
+      - DATA_DEST_DIR=/opt/airflow/data/raw/train
+      - CONFIG_DIR=/opt/airflow/config
+    depends_on:
+      - postgres
+      - airflow-webserver
+    networks:
+      - sentiment_network
+
+networks:
+  sentiment_network:
+    driver: bridge
+
+volumes:
+  postgres-db-volume:
