@@ -142,7 +142,7 @@ Key benefits:
   - <img src="https://airflow.apache.org/docs/apache-airflow/1.10.15/_images/pin_large.png" height="15"> Airflow (pipeline scheduling)
   
 - **Infrastructure**: 
-  - <img src="https://www.docker.com/sites/default/files/d8/2019-07/vertical-logo-monochromatic.png" height="15"> Docker
+  - <img src="image/docker.jpg" height="15"> Docker
   - Docker Compose
   
 - **Data Processing**:

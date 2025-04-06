@@ -167,7 +167,6 @@ def train(**kwargs):
         trainconfig[key] = value
     # Train the model
     model, preprocessor = train_model(train_path, val_path, trainconfig, output_dir='/opt/airflow/models')
-    
     return {
         'model_path': '/opt/airflow/models/artifacts/textCNN_best_model.pt',
         'vocab_path': '/opt/airflow/models/vocab/vocab_textCNN.pth'
@@ -228,6 +227,7 @@ def evaluate(**kwargs):
         order_by=["start_time DESC"],
         max_results=1
     )[0].info.run_id
+    
     # log to current run
     with mlflow.start_run(run_id=run_id):
         mlflow.log_metric("test_loss", test_loss)
@@ -281,17 +281,18 @@ def deploy_model(**kwargs):
             print("Current model is worse than the production model. Not deploying.")
     else: 
         print("No production model found. Deploying current model.")
-        latest_version = client.get_latest_versions("textcnn-sentiment", stages=["None"])[0].version
+        latest_version = client.get_latest_versions("textcnn-sentiment")[0].version
         torch.save(model.state_dict(), f"models/artifacts/textCNN_best_model_{latest_version}.pt")
         torch.save(vocab, f"models/vocab/vocab_textCNN_{latest_version}.pth")
+        deploy_model = False
         
     if deploy_model and current_test_accuracy > 0.85:
-        latest_version = client.get_latest_versions("textcnn-sentiment", stages=["None"])[0].version
+        latest_version = client.get_latest_versions("textcnn-sentiment", stages=["Production"])[0].version
         torch.save(model.state_dict(), f"models/artifacts/textCNN_best_model_{latest_version}.pt")
         client.transition_model_version_stage(
             name="textcnn-sentiment",
             version=latest_version,
-            stage="Production",
+            stages=["Production"],
             archive_existing_versions=True
         )
         print(f"Model version {latest_version} deployed to production.")

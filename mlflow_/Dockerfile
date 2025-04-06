@@ -5,11 +5,18 @@ WORKDIR /app
 # Install dependencies
 RUN pip install --no-cache-dir mlflow==2.6.0 psycopg2-binary boto3
 
-# Create directories for artifacts
-RUN mkdir -p /mlflow/artifacts
+# Create directories for artifacts and backing storage
+RUN mkdir -p /mlflow/artifacts /mlflow/mlruns
+
+# Set permissions to allow MLflow to write to directories
+RUN chmod -R 777 /mlflow
 
 # Expose port
 EXPOSE 5000
+
+# Set environment variables with defaults for better robustness
+ENV BACKEND_STORE_URI=/mlflow/mlruns
+ENV DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
 
 # Start MLflow tracking server
 CMD mlflow server \

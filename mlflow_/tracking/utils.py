@@ -1,6 +1,5 @@
 import os
 import mlflow
-import mlflow.pytorch
 
 
 def setup_mlflow(experiment_name="vietnamese-sentiment-analysis", tracking_uri="http://mlflow:5000"):
@@ -24,10 +23,13 @@ def log_metrics(metrics, epoch):
     mlflow.log_metrics(metrics, step=epoch)
 
 
-def log_model(model, model_name="sentiment_model", model_path="models/"):
-    mlflow.pytorch.log_model(model, model_name)
-    # log model artifacts
-    mlflow.log_artifact(model_path, artifact_path=model_name)
-    mlflow.log_artifact(model_path +"vocab.pth", artifact_path=model_name)
+def log_model(model, model_name="sentiment_model", model_path="models/", input_shape = None):
+    mlflow.pytorch.log_model(model,
+                             artifact_path='model',
+                             registered_model_name=model_name,
+                             input_examples=input_shape)
+    vocab_path = os.path.join(model_path, 'vocab')
+    vocab_path = os.path.join(vocab_path, 'vocab_textCNN.pth')
+    mlflow.log_artifact(vocab_path, artifact_path='vocab')
 
 
