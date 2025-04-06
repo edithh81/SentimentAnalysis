@@ -1,7 +1,7 @@
 # 🇻🇳 Vietnamese Sentiment Analysis System
 
 A comprehensive **sentiment analysis** system using **<img src="https://pytorch.org/assets/images/pytorch-logo.png" height="15"> PyTorch, <img src="https://pytorch.org/text/stable/_static/img/pytorch-logo-dark.svg" height="15"> TorchText, <img src="https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png" height="15"> FastAPI, <img src="https://streamlit.io/images/brand/streamlit-logo-secondary-colormark-darktext.svg" height="15"> Streamlit, <img src="https://mlflow.org/docs/latest/assets/images/model-topics-849436da5364525257ee1593d983a6ec.png" height="15"> MLflow, and <img src="https://airflow.apache.org/docs/apache-airflow/1.10.15/_images/pin_large.png" height="15"> Airflow**. 
-The system uses a **TextCNN** model trained on the **NTC-SCV** dataset to classify Vietnamese text as **positive** or **negative**.
+The system uses a **TextCNN** model trained on the **NTC-SCV** dataset to classify Vietnamese text as **positive** or **negative**. [Quick demo here](https://www.youtube.com/watch?v=VE2-QDoDTMg)
 
 <img src="image/model.png" alt="Model Architecture" width="800"/>
 
@@ -114,7 +114,7 @@ The automated training pipeline is orchestrated by Apache Airflow, running on a 
 └── 🚀 deploy_model
     └── Promotes model to production if metrics improve
 ```
-
+<img src="image/pipeline.png" alt="Training pipeline"/>
 The DAG runs weekly to incorporate new data and feedback, ensuring the model stays current with evolving language patterns. The pipeline automatically logs all experiments to MLflow, enabling complete tracking of model performance over time.
 
 Key benefits:
@@ -164,7 +164,7 @@ Key benefits:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/vietnamese-sentiment-analysis.git
+   git clone https://github.com/edithh81/vietnamese-sentiment-analysis.git
    cd vietnamese-sentiment-analysis
    ```
 

@@ -230,68 +230,70 @@ def train_model(train_path, val_path, params, output_dir='/opt/airflow/models'):
             print(f"Error loading best model: {e}")
             traceback.print_exc()
         
-        # Log model to MLflow
-        try:
-            # Get a valid input example for logging
-            sample_input, _ = next(iter(val_loader))
-            # Move sample to same device as model
-            sample_input = sample_input.to(device)
+        # # Log model to MLflow
+        # try:
+        #     # Get a valid input example for logging
+        #     sample_input, _ = next(iter(val_loader))
+        #     # Move sample to same device as model
+        #     sample_input = sample_input.to(device)
             
-            # Move model to CPU for logging to avoid CUDA serialization issues
-            model_cpu = model.cpu()
+        #     # Move model to CPU for logging to avoid CUDA serialization issues
+        #     model_cpu = model.cpu()
             
-            # Check if vocab file exists before logging
-            vocab_file_path = os.path.join(vocab_dir, 'vocab_textCNN.pth')
-            if not os.path.exists(vocab_file_path):
-                print(f"Warning: Vocab file not found at {vocab_file_path}")
-            else:
-                # Log vocabulary file as a separate artifact with absolute path
-                mlflow.log_artifact(os.path.abspath(vocab_file_path), artifact_path='vocab')
-                print(f"Logged vocabulary file as artifact: {vocab_file_path}")
+        #     # Check if vocab file exists before logging
+        #     vocab_file_path = os.path.join(vocab_dir, 'vocab_textCNN.pth')
+        #     if not os.path.exists(vocab_file_path):
+        #         print(f"Warning: Vocab file not found at {vocab_file_path}")
+        #     else:
+        #         # Log vocabulary file as a separate artifact with absolute path
+        #         mlflow.log_artifact(os.path.abspath(vocab_file_path), artifact_path='vocab')
+        #         print(f"Logged vocabulary file as artifact: {vocab_file_path}")
             
-            # Save and log the best model file with absolute path
-            if os.path.exists(best_model_path):
-                mlflow.log_artifact(os.path.abspath(best_model_path), artifact_path='model')
-                print(f"Logged best model file as artifact: {best_model_path}")
+        #     # Save and log the best model file with absolute path
+        #     if os.path.exists(best_model_path):
+        #         mlflow.log_artifact(os.path.abspath(best_model_path), artifact_path='model')
+        #         print(f"Logged best model file as artifact: {best_model_path}")
             
-            # For MLflow 2.6.0, try different approach for model logging
-            try:
-                # Convert sample input to numpy for compatibility
-                input_sample_np = sample_input.cpu().numpy()
+        #     # For MLflow 2.6.0, try different approach for model logging
+        #     try:
+        #         # Convert sample input to numpy for compatibility
+        #         input_sample_np = sample_input.cpu().numpy()
                 
-                # Log model using specific signature format for MLflow 2.6.0
-                from mlflow.models.signature import infer_signature
-                prediction = model_cpu(sample_input.cpu())
-                signature = infer_signature(input_sample_np, prediction.detach().numpy())
+        #         # Log model using specific signature format for MLflow 2.6.0
+        #         from mlflow.models.signature import infer_signature
+        #         prediction = model_cpu(sample_input.cpu())
+        #         signature = infer_signature(input_sample_np, prediction.detach().numpy())
                 
-                model_info = mlflow.pytorch.log_model(
-                    pytorch_model=model_cpu,
-                    artifact_path='pytorch-model',
-                    signature=signature,
-                    registered_model_name='sentiment_cnn_model'
-                )
-                print(f"Logged PyTorch model with signature, model URI: {model_info.model_uri}")
-            except Exception as e:
-                print(f"Error with advanced model logging: {e}")
-                # Fallback to basic model logging
-                mlflow.pytorch.log_model(
-                    pytorch_model=model_cpu,
-                    artifact_path='pytorch-model'
-                )
-                print("Used fallback model logging method")
+        #         model_info = mlflow.pytorch.log_model(
+        #             pytorch_model=model_cpu,
+        #             artifact_path='pytorch-model',
+        #             signature=signature,
+        #             registered_model_name='sentiment_cnn_model'
+        #         )
+        #         print(f"Logged PyTorch model with signature, model URI: {model_info.model_uri}")
+        #     except Exception as e:
+        #         print(f"Error with advanced model logging: {e}")
+        #         # Fallback to basic model logging
+        #         mlflow.pytorch.log_model(
+        #             pytorch_model=model_cpu,
+        #             artifact_path='pytorch-model'
+        #         )
+        #         print("Used fallback model logging method")
             
-            # Move model back to original device
-            model = model_cpu.to(device)
+        #     # Move model back to original device
+        #     model = model_cpu.to(device)
             
-            # Register model if requested
-            if params.get('register_model'):
-                register_model(model, run_id=run.info.run_id, stage='Staging')
-        except Exception as e:
-            print(f"Error logging model to MLflow: {e}")
-            traceback.print_exc()
+        #     # Register model if requested
+        #     if params.get('register_model'):
+        #         register_model(model, run_id=run.info.run_id, stage='Staging')
+        # except Exception as e:
+        #     print(f"Error logging model to MLflow: {e}")
+        #     traceback.print_exc()
             
-        print("Training complete.")
-        return model, preprocessor
-
+        # # print("Training complete.")
+        # sample_input, _ = next(iter(val_loader))
+        # #     # Move sample to same device as model
+        # sample_input = sample_input.to(device)
+        return model, preprocessor, vocab_dir, artifacts_dir
 
 

@@ -93,10 +93,11 @@ services:
       - ./src:/opt/airflow/src
       - ./airflow/dags/config:/opt/airflow/config
       - ./ntc-scv:/opt/airflow/ntc-scv
-      - ./mlflow_/artifacts:/opt/airflow/mlflow_/artifacts
-      - ./mlflow_:/opt/airflow/mlflow_
+      - ./mlflow_/artifacts:/mlflow/artifacts
+      - ./mlflow_/mlruns:/mlflow/mlruns
+      - ./mlflow_/tracking:/opt/airflow/mlflow_/tracking
       - ./mlflow_/data:/opt/airflow/mlflow_/data
-      - ./mlflow_/mlruns:/opt/airflow/mlflow_/mlruns
+      - ./mlflow_/registry:/opt/airflow/mlflow_/registry
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
@@ -123,10 +124,11 @@ services:
       - ./models:/opt/airflow/models
       - ./data:/opt/airflow/data
       - ./src:/opt/airflow/src
-      - ./mlflow_/artifacts:/opt/airflow/mlflow_/artifacts
-      - ./mlflow_:/opt/airflow/mlflow_
+      - ./mlflow_/artifacts:/mlflow/artifacts
+      - ./mlflow_/mlruns:/mlflow/mlruns
+      - ./mlflow_/tracking:/opt/airflow/mlflow_/tracking
       - ./mlflow_/data:/opt/airflow/mlflow_/data
-      - ./mlflow_/mlruns:/opt/airflow/mlflow_/mlruns
+      - ./mlflow_/registry:/opt/airflow/mlflow_/registry
       - ./ntc-scv:/opt/airflow/ntc-scv
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor

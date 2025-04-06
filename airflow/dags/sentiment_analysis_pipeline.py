@@ -166,7 +166,30 @@ def train(**kwargs):
     for key, value in modelconfig.items():
         trainconfig[key] = value
     # Train the model
-    model, preprocessor = train_model(train_path, val_path, trainconfig, output_dir='/opt/airflow/models')
+    model, preprocessor,vocab_dir, artifacts_dir= train_model(train_path, val_path, trainconfig, output_dir='/opt/airflow/models')
+    client = mlflow.tracking.MlflowClient()
+    run_id = client.search_runs(
+        experiment_ids=[mlflow.get_experiment_by_name("vietnamese-sentiment-analysis").experiment_id],
+        filter_string="",
+        order_by=["start_time DESC"],
+        max_results=1
+    )[0].info.run_id
+    # log to current run
+    artifacts_dir = os.path.join(artifacts_dir, 'textCNN_best_model.pt')
+    vocab_dir = os.path.join(vocab_dir, 'vocab_textCNN.pth')
+    with mlflow.start_run(run_id=run_id):
+        mlflow.log_artifact(artifacts_dir, artifact_path="artifacts")
+        mlflow.log_artifact(vocab_dir, artifact_path="vocab")
+        model_uri = f"runs:/{run_id}/model"
+        result = mlflow.register_model(model_uri, "textcnn-sentiment")
+
+        # Move the model to a specific stage (e.g., Staging)
+        client = mlflow.tracking.MlflowClient()
+        client.transition_model_version_stage(
+            name="textcnn-sentiment",
+            version=result.version,
+            stage="Staging"
+        )
     return {
         'model_path': '/opt/airflow/models/artifacts/textCNN_best_model.pt',
         'vocab_path': '/opt/airflow/models/vocab/vocab_textCNN.pth'
@@ -284,6 +307,13 @@ def deploy_model(**kwargs):
         latest_version = client.get_latest_versions("textcnn-sentiment")[0].version
         torch.save(model.state_dict(), f"models/artifacts/textCNN_best_model_{latest_version}.pt")
         torch.save(vocab, f"models/vocab/vocab_textCNN_{latest_version}.pth")
+        client.transition_model_version_stage(
+            name="textcnn-sentiment",
+            version=latest_version,
+            stage="Production",
+            archive_existing_versions=True
+        )
+        print(f"Model version {latest_version} deployed to production.")
         deploy_model = False
         
     if deploy_model and current_test_accuracy > 0.85:
@@ -292,7 +322,7 @@ def deploy_model(**kwargs):
         client.transition_model_version_stage(
             name="textcnn-sentiment",
             version=latest_version,
-            stages=["Production"],
+            stage="Production",
             archive_existing_versions=True
         )
         print(f"Model version {latest_version} deployed to production.")
@@ -343,3 +373,4 @@ with DAG(
     
     # Set task dependencies
     extract_task >> transform_task >> train_task >> evaluate_task >> deploy_task
+    

@@ -5,22 +5,22 @@ dataconfig:
   
 modelconfig:
   modelname: textcnn
-  vocab_size: 5000
-  embed_size: 200
-  num_filters: 100
+  vocab_size: 6000
+  embed_size: 500
+  num_filters: 200
   num_classes: 2
   kernel_sizes: [2,3,4]
 
 trainconfig:
   run_name: textcnn
-  vocab_size: 5000
-  seed: 42
+  vocab_size: 6000
+  seed: 81
   epochs: 1
   batch_size: 32
   optimizer: adam
   learning_rate: 0.001
   min_freq: 5
-  max_tokens: 5000
+  max_tokens: 6000
   best_model_metric: val_loss
   best_deploy_metric: val_loss
   device: cpu
