@@ -58,9 +58,20 @@ wheels/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+/notebooks/results/
+/notebooks/wandb/
 
 # MLflow
 mlruns/
+
+# Models directory - keep structure but ignore contents
+/models/*
+!/models/artifacts/
+!/models/finetuned_model/
+/models/artifacts/*
+/models/finetuned_model/*
+# Add .gitkeep exceptions if needed
+!/**/.gitkeep
 
 # Docker
 .dockerignore
